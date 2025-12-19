@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>YouTube Viral Title & Tag Finder</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card-bg: #111827;
+            --accent: #3b82f6;
+            --accent-soft: rgba(59, 130, 246, 0.15);
+            --text: #e5e7eb;
+            --muted: #9ca3af;
+            --border: #1f2937;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 40px 20px;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: radial-gradient(circle at top, #1f2937 0, #020617 40%, #000 100%);
+            color: var(--text);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 6px;
+        }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(14px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .badge {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 999px;
+            background: var(--accent-soft);
+            color: #bfdbfe;
+            border: 1px solid rgba(59, 130, 246, 0.5);
+        }
+
+        form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        input[type="text"] {
+            flex: 1 1 260px;
+            padding: 10px 12px;
+            font-size: 14px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: #020617;
+            color: var(--text);
+            outline: none;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.5);
+        }
+
+        button.primary {
+            padding: 9px 16px;
+            border-radius: 999px;
+            border: none;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        button.primary:hover {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        }
+
+        button.secondary {
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: #020617;
+            color: var(--muted);
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        button.secondary:hover {
+            border-color: var(--accent);
+            color: var(--text);
+        }
+
+        .label-small {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 6px;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 2fr 1.5fr;
+            gap: 16px;
+        }
+
+        @media (max-width: 800px) {
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 8px 10px;
+            background: #020617;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-size: 13px;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.5);
+        }
+
+        .helper-text {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        .viral-list {
+            list-style: none;
+            padding-left: 0;
+            margin: 0;
+        }
+
+        .viral-item {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(15, 23, 42, 0.9);
+        }
+
+        .viral-item:last-child {
+            border-bottom: none;
+        }
+
+        .viral-title {
+            font-size: 14px;
+        }
+
+        .viral-meta {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .table-wrapper {
+            max-height: 260px;
+            overflow: auto;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 13px;
+        }
+
+        th, td {
+            padding: 6px 10px;
+            text-align: left;
+        }
+
+        th {
+            position: sticky;
+            top: 0;
+            background: #020617;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tr:nth-child(even) td {
+            background: rgba(15, 23, 42, 0.7);
+        }
+
+        .rank-cell {
+            text-align: center;
+            width: 40px;
+            color: var(--muted);
+        }
+
+        .error {
+            color: #fca5a5;
+            font-size: 13px;
+            margin-top: 8px;
+        }
+
+        .copy-status {
+            font-size: 11px;
+            color: var(--muted);
+            margin-left: 6px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>YouTube Viral Title & Tag Finder</h1>
+    <p class="subtitle">
+        Enter a topic or draft title. The app finds the most viral related videos,
+        suggests a sample title, and extracts top‑performing tags you can copy.
+    </p>
+
+    <!-- INPUT CARD -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">1. Enter your topic</div>
+            <span class="badge">YouTube Data API v3</span>
+        </div>
+        <form method="post">
+            <input
+                type="text"
+                name="title"
+                placeholder="e.g. How to make money with YouTube automation"
+                value="{{ query | default('') }}"
+            />
+            <button type="submit" class="primary">
+                Analyze Topic
+            </button>
+        </form>
+        <div class="label-small">
+            Tip: Use your niche keywords (e.g. "AI faceless channel ideas", "gym workout for beginners").
+        </div>
+        {% if error_message %}
+            <p class="error">Error: {{ error_message }}</p>
+        {% endif %}
+    </div>
+
+    {% if query %}
+    <div class="two-column">
+        <!-- LEFT: VIRAL TITLES + SUGGESTED TITLE -->
+        <div>
+            <!-- Suggested viral title -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">2. Suggested Viral‑Style Title</div>
+                    <div>
+                        <button type="button" class="secondary" onclick="copySuggestedTitle()">
+                            Copy Title
+                        </button>
+                        <span id="copy-title-status" class="copy-status"></span>
+                    </div>
+                </div>
+
+                {% if suggested_title %}
+                    <div id="suggested-title-text" style="font-size:15px; font-weight:500;">
+                        {{ suggested_title }}
+                    </div>
+                    <div class="helper-text">
+                        Based on the highest‑viewed video for your topic. Tweak the wording to match your content.
+                    </div>
+                {% else %}
+                    <div class="helper-text">
+                        No viral titles found for this topic.
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- List of top viral videos -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">3. Top Viral Videos (for this topic)</div>
+                </div>
+                {% if viral_videos %}
+                    <ul class="viral-list">
+                        {% for v in viral_videos %}
+                            <li class="viral-item">
+                                <div class="viral-title">
+                                    {% if v.url %}
+                                        <a href="{{ v.url }}" target="_blank" style="color:#93c5fd; text-decoration:none;">
+                                            {{ v.title }}
+                                        </a>
+                                    {% else %}
+                                        {{ v.title }}
+                                    {% endif %}
+                                </div>
+                                <div class="viral-meta">
+                                    {{ v.channel }} • {{ "{:,}".format(v.views) }} views
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="helper-text">
+                        No viral videos found (or API returned none) for this query.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- RIGHT: TOP TAGS + COPY -->
+        <div>
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">4. Top Performing Tags</div>
+                    <div>
+                        <button type="button" class="secondary" onclick="copyTags()">
+                            Copy Tags
+                        </button>
+                        <span id="copy-tags-status" class="copy-status"></span>
+                    </div>
+                </div>
+
+                {% if tags %}
+                    <label class="label-small">Top tags (combined):</label>
+                    <textarea id="tags-text" readonly>{{ tags_text }}</textarea>
+                    <div class="helper-text">
+                        These tags come from high‑view videos for your topic (sorted by view count).
+                        Always mix in tags specific to your exact video.
+                    </div>
+
+                    <div style="margin-top:12px; font-size:13px; font-weight:500;">
+                        Detailed Tag Breakdown
+                    </div>
+                    <div class="table-wrapper" style="margin-top:6px;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th class="rank-cell">#</th>
+                                    <th>Tag</th>
+                                    <th>Used in Videos</th>
+                                    <th>Total Views</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for tag in tags %}
+                                <tr>
+                                    <td class="rank-cell">{{ tag.rank }}</td>
+                                    <td>{{ tag.tag }}</td>
+                                    <td>{{ tag.frequency }}</td>
+                                    <td>{{ "{:,}".format(tag.total_views) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="helper-text">
+                        No tags found for this topic, or the videos returned by the API don't expose tags.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    function copySuggestedTitle() {
+        const el = document.getElementById("suggested-title-text");
+        const statusEl = document.getElementById("copy-title-status");
+        if (!el) {
+            statusEl.textContent = "No title to copy.";
+            return;
+        }
+        const text = el.textContent || el.innerText;
+        navigator.clipboard.writeText(text).then(function () {
+            statusEl.textContent = "Copied!";
+            setTimeout(() => statusEl.textContent = "", 1500);
+        }).catch(function () {
+            statusEl.textContent = "Copy failed.";
+            setTimeout(() => statusEl.textContent = "", 2000);
+        });
+    }
+
+    function copyTags() {
+        const el = document.getElementById("tags-text");
+        const statusEl = document.getElementById("copy-tags-status");
+        if (!el) {
+            statusEl.textContent = "No tags to copy.";
+            return;
+        }
+        const text = el.value;
+        navigator.clipboard.writeText(text).then(function () {
+            statusEl.textContent = "Copied!";
+            setTimeout(() => statusEl.textContent = "", 1500);
+        }).catch(function () {
+            statusEl.textContent = "Copy failed.";
+            setTimeout(() => statusEl.textContent = "", 2000);
+        });
+    }
+</script>
+</body>
+</html>
